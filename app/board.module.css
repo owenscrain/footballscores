@@ -1,6 +1,24 @@
+/* Outer viewport: fills whatever window/screen this actually renders in,
+   and centers the fixed-size stage inside it. */
+.viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The stage itself is always exactly 1080x1920 — scaled up or down via
+   a CSS transform (applied inline from page.js) to fit the real window,
+   never by changing these pixel values. This is what guarantees the
+   design always renders at the intended size instead of drifting with
+   whatever viewport dimensions a given browser/TV happens to report. */
 .wrap {
-  height: 100dvh;
-  width: 100vw;
+  width: 1080px;
+  height: 1920px;
+  flex: 0 0 auto;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -16,9 +34,9 @@
   text-align: center;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 700;
-  font-size: clamp(22px, 5.6vw, 30px);
+  font-size: 60px;
   letter-spacing: 0.02em;
-  padding: clamp(14px, 2.6vh, 18px) 0;
+  padding: 32px 0;
 }
 
 /* ---------- Train departure rows — CTA font, restored brown bars ---------- */
@@ -32,7 +50,7 @@
   align-items: center;
   justify-content: space-between;
   background: #5c3820;
-  padding: clamp(12px, 2.2vh, 16px) clamp(16px, 5vw, 24px);
+  padding: 32px 54px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -42,25 +60,25 @@
 
 .trainLabel {
   font-weight: 700;
-  font-size: clamp(22px, 5.6vw, 30px);
+  font-size: 60px;
   color: #fff;
 }
 
 .trainEta {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 6px;
   color: #fff;
 }
 
 .trainNum {
   font-weight: 700;
-  font-size: clamp(24px, 6.2vw, 32px);
+  font-size: 67px;
 }
 
 .trainUnit {
   font-weight: 500;
-  font-size: clamp(14px, 3.5vw, 18px);
+  font-size: 38px;
   opacity: 0.85;
 }
 
@@ -72,30 +90,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(12px, 2.4vh, 18px) clamp(16px, 5vw, 24px);
+  padding: 32px 54px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .weather {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
 }
 
 .weather svg {
-  width: clamp(28px, 7.5vw, 38px);
-  height: clamp(28px, 7.5vw, 38px);
+  width: 81px;
+  height: 81px;
 }
 
 .temp {
   font-weight: 700;
-  font-size: clamp(22px, 5.6vw, 30px);
+  font-size: 60px;
   color: #fff;
 }
 
 .time {
   font-weight: 700;
-  font-size: clamp(22px, 5.6vw, 30px);
+  font-size: 60px;
   color: #fff;
   font-variant-numeric: tabular-nums;
 }
@@ -109,21 +127,19 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(14px, 3vh, 24px) clamp(14px, 5vw, 24px);
-  gap: clamp(14px, 2.6vh, 22px);
+  padding: 58px 54px;
+  gap: 50px;
 }
 
 .centerMsg {
   font-family: var(--font-display);
   color: var(--text-dim);
-  font-size: clamp(16px, 4.5vw, 22px);
+  font-size: 49px;
   text-align: center;
 }
 
 .card {
   width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: inherit;
@@ -131,24 +147,24 @@
 
 .teamCard {
   background: var(--surface);
-  border-radius: 16px;
-  padding: clamp(16px, 3vh, 24px) clamp(14px, 4vw, 20px) clamp(14px, 2.6vh, 20px);
+  border-radius: 24px;
+  padding: 58px 43px 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(6px, 1.4vh, 10px);
+  gap: 27px;
 }
 
 .teamName {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(24px, 4.5vh, 42px);
+  font-size: 86px;
   letter-spacing: 0.01em;
   text-align: center;
   line-height: 1.1;
   display: flex;
   align-items: baseline;
-  gap: 9px;
+  gap: 16px;
   color: var(--text);
 }
 
@@ -156,21 +172,21 @@
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--live);
-  font-size: clamp(14px, 2.3vh, 22px);
+  font-size: 44px;
 }
 
 .score {
   font-family: var(--font-mono);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  font-size: clamp(56px, 11vh, 96px);
+  font-size: 211px;
   line-height: 1;
   color: var(--text);
 }
 
 .colorBar {
-  width: clamp(60px, 11vh, 96px);
-  height: 7px;
+  width: 211px;
+  height: 12px;
   border-radius: 99px;
   background: var(--c);
 }
@@ -188,16 +204,16 @@
 }
 
 .teamLogo {
-  width: clamp(56px, 10vh, 96px);
-  height: clamp(56px, 10vh, 96px);
+  width: 192px;
+  height: 192px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.5));
 }
 
 .teamLogoFallback {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: clamp(20px, 6vw, 28px);
+  font-size: 65px;
   color: var(--text-mid);
 }
 
@@ -205,22 +221,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 20px;
 }
 
 .liveDot {
-  width: clamp(12px, 3vw, 16px);
-  height: clamp(12px, 3vw, 16px);
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--live);
-  box-shadow: 0 0 16px 3px var(--live);
+  box-shadow: 0 0 24px 5px var(--live);
   animation: pulse 1.6s ease-in-out infinite;
 }
 
 .midText {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: clamp(20px, 3.4vh, 30px);
+  font-size: 65px;
   color: var(--text);
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
@@ -229,7 +245,7 @@
 .midTextFinal {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: clamp(20px, 3.4vh, 30px);
+  font-size: 65px;
   color: var(--final);
   letter-spacing: 0.08em;
 }
