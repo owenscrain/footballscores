@@ -167,7 +167,7 @@ export default function Page() {
   // designed to be instead of drifting with the viewport's reported size.
   useEffect(() => {
     function updateScale() {
-      const s = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+      const s = Math.min(window.innerWidth / 720, window.innerHeight / 1280);
       setScale(s);
     }
     updateScale();
@@ -203,6 +203,11 @@ export default function Page() {
         const res = await fetch(`/api/scores?league=${league}`, { cache: 'no-store' });
         const data = await res.json();
         if (cancelled) return;
+        if (!res.ok || data.error) {
+          console.error('scores fetch failed:', data.error || res.status);
+          setStatus('error');
+          return;
+        }
         setGames(sortGames(data.games || []));
         setStatus('ready');
         setActiveIndex((i) => (data.games && data.games.length ? i % data.games.length : 0));
