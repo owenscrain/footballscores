@@ -9,9 +9,16 @@ const TRAINS_POLL_MS = 15000; // 15 seconds
 const ROTATE_MS = 8000;
 const TIME_ZONE = 'America/Chicago';
 
-function leagueForToday(date) {
+function leagueForToday() {
   // Saturday -> college football. Everything else (incl. Thu/Mon NFL nights) -> NFL.
-  return date.getDay() === 6 ? 'cfb' : 'nfl';
+  // Always checked in Chicago time, not the viewing device's local timezone —
+  // otherwise a device set to a different timezone can land on the wrong
+  // day and silently pick the wrong league.
+  const weekday = new Date().toLocaleDateString('en-US', {
+    timeZone: TIME_ZONE,
+    weekday: 'short'
+  });
+  return weekday === 'Sat' ? 'cfb' : 'nfl';
 }
 
 function sortGames(games) {
@@ -146,13 +153,27 @@ function GameCard({ game }) {
 }
 
 export default function Page() {
-  const [league, setLeague] = useState(() => leagueForToday(new Date()));
+  const [league, setLeague] = useState(() => leagueForToday());
   const [games, setGames] = useState([]);
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [activeIndex, setActiveIndex] = useState(0);
   const [weather, setWeather] = useState(null);
   const [trains, setTrains] = useState([]);
   const [clock, setClock] = useState(new Date());
+  const [scale, setScale] = useState(1);
+
+  // Keep the fixed 1080x1920 stage scaled to fit whatever window/screen
+  // this actually renders in, so sizing is always exactly what it's
+  // designed to be instead of drifting with the viewport's reported size.
+  useEffect(() => {
+    function updateScale() {
+      const s = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+      setScale(s);
+    }
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   // League: auto-detect by day of week, unless overridden with ?league=cfb|nfl in the URL
   // (handy for Ablesign — just point the playlist item's URL at ?league=nfl to pin it).
@@ -163,7 +184,7 @@ export default function Page() {
       setLeague(override);
       return;
     }
-    const id = setInterval(() => setLeague(leagueForToday(new Date())), 60000);
+    const id = setInterval(() => setLeague(leagueForToday()), 60000);
     return () => clearInterval(id);
   }, []);
 
@@ -258,46 +279,58 @@ export default function Page() {
   });
 
   return (
-    <main className={styles.wrap}>
-      <header className={styles.fheader}>{leagueLabel}</header>
+    <div className={styles.viewport}>
+      <main className={styles.wrap} style={{ transform: `scale(${scale})` }}>
+        <header className={styles.fheader}>{leagueLabel}</header>
 
-      <section className={styles.fcontent}>
-        {status === 'loading' && <div className={styles.centerMsg}>Loading scores…</div>}
-        {status === 'error' && <div className={styles.centerMsg}>Couldn&apos;t reach ESPN. Retrying…</div>}
-        {status === 'ready' && games.length === 0 && (
-          <div className={styles.centerMsg}>No games today</div>
-        )}
-        {status === 'ready' && activeGame && <GameCard game={activeGame} />}
-      </section>
+        <section className={styles.fcontent}>
+          {status === 'loading' && <div className={styles.centerMsg}>Loading scores…</div>}
+          {status === 'error' && <div className={styles.centerMsg}>Couldn&apos;t reach ESPN. Retrying…</div>}
+          {status === 'ready' && games.length === 0 && (
+            <div className={styles.centerMsg}>No games today</div>
+          )}
+          {status === 'ready' && activeGame && <GameCard game={activeGame} />}
+        </section>
 
-      {/* Train departures — Addison (Brown Line), Loop-bound only. */}
-      {trains.length > 0 && (
+        {/* Train departures — Addison (Brown Line), Loop-bound only. */}
         <div className={styles.trainRows}>
-          {trains.map((t, i) => (
+          {(trains.length > 0
+            ? trains
+            : [
+                { destination: 'Loop', minutes: null, due: false },
+                { destination: 'Loop', minutes: null, due: false }
+              ]
+          ).map((t, i) => (
             <div className={styles.trainRow} key={i}>
               <span className={styles.trainLabel}>{t.destination}</span>
               <span className={styles.trainEta}>
-                <span className={styles.trainNum}>{t.due ? 'Due' : t.minutes}</span>
-                {!t.due && <span className={styles.trainUnit}>min</span>}
+                {t.minutes === null ? (
+                  <span className={styles.trainNum}>—</span>
+                ) : (
+                  <>
+                    <span className={styles.trainNum}>{t.due ? 'Due' : t.minutes}</span>
+                    {!t.due && <span className={styles.trainUnit}>min</span>}
+                  </>
+                )}
               </span>
             </div>
           ))}
         </div>
-      )}
 
-      <footer className={styles.ffooter}>
-        <div className={styles.weather}>
-          {weather ? (
-            <>
-              <WeatherIcon category={weather.category} />
-              <span className={styles.temp}>{weather.tempF}°</span>
-            </>
-          ) : (
-            <span className={styles.temp}>—</span>
-          )}
-        </div>
-        <div className={styles.time}>{timeLabel}</div>
-      </footer>
-    </main>
+        <footer className={styles.ffooter}>
+          <div className={styles.weather}>
+            {weather ? (
+              <>
+                <WeatherIcon category={weather.category} />
+                <span className={styles.temp}>{weather.tempF}°</span>
+              </>
+            ) : (
+              <span className={styles.temp}>—</span>
+            )}
+          </div>
+          <div className={styles.time}>{timeLabel}</div>
+        </footer>
+      </main>
+    </div>
   );
 }
